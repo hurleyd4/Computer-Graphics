@@ -1,0 +1,28 @@
+#version 330
+
+in vec3 LightIntensity;
+in vec3 vs_normal;
+in vec3 vs_position;
+in vec3 lightPosition;
+
+uniform vec3 cameraPosition;
+
+void main(){	
+	//ambient light
+	vec3 ambientLight = vec3(0.1f,0.1f,0.1f);
+
+	//diffuse
+	vec3 posToLightDirVec = normalize(vs_position - lightPosition);
+	vec3 diffuseColor = vec3(1.0f,1.0f,1.0f);
+	float diffuse = clamp(dot(posToLightDirVec, vs_normal),0,1);
+	vec3 diffuseFinal = diffuseColor*diffuse;
+
+	//specular
+	vec3 lightToPosDirVec = normalize(lightPosition- vs_position);
+	vec3 reflectDirVec = normalize(reflect(lightToPosDirVec, normalize(vs_normal)));
+	vec3 posToViewDirVec = normalize(vs_position - cameraPosition);
+	float specularConstant = pow(max(dot(posToViewDirVec, reflectDirVec),0),40);
+	vec3 specularFinal = vec3(1.f,1.f,1.f) * specularConstant;
+
+	gl_FragColor = vec4 (LightIntensity, 1.0) * (vec4(ambientLight,1.0f)+(vec4(diffuseFinal,1.f) + (vec4(specularFinal,1.f))));
+}
